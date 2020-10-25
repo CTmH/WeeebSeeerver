@@ -15,7 +15,7 @@ public class WebServer implements Runnable{
 	
 	private ServerSocket serverSocket;
 	private boolean stop=true;
-	private List<Link> socketlist;
+	private List<LinkThread> socketlist;
 	private int port;
 	private long totalLink = 0;
 
@@ -30,7 +30,7 @@ public class WebServer implements Runnable{
 		
 		// 初始化服务器状态
 		stop = true;
-		socketlist = new LinkedList<Link>();
+		socketlist = new LinkedList<LinkThread>();
 //		listener = new Listener();
 //		printWelcome();
 	}
@@ -91,7 +91,7 @@ public class WebServer implements Runnable{
 			}
 			try {
 				Socket soket = serverSocket.accept();
-				Link sl = new Link(soket);
+				LinkThread sl = new LinkThread(soket);
 				socketlist.add(sl);
 				++totalLink;
 			} catch (IOException e) {
@@ -119,7 +119,7 @@ public class WebServer implements Runnable{
 				while (!stop || socketlist.size()!=0) {
 					
 					for (int i=0; i<socketlist.size(); ++i) {
-						Link is = (Link)socketlist.get(i);
+						LinkThread is = (LinkThread)socketlist.get(i);
 						if (is.isDisconnect()) {
 							socketlist.remove(is);
 						}

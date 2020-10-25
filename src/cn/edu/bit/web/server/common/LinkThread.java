@@ -13,7 +13,7 @@ import cn.edu.bit.web.server.interf.IResponse;
 import cn.edu.bit.web.server.config.WebConfig;
 import cn.edu.bit.web.server.config.RequestErrCode;
 
-public class Link implements Runnable, IResponse{
+public class LinkThread extends Thread implements IResponse{
 	private Socket socket;
 	private volatile boolean stop = false;
 	
@@ -22,14 +22,14 @@ public class Link implements Runnable, IResponse{
 	private File sendfile;
 	private SenderThread senderThread;
 	
-	public Link(Socket s) throws IOException {
+	public LinkThread(Socket s) throws IOException {
 		socket = s;
 		socket.setSoTimeout(WebConfig.socketReadOuttime);
 		in  = s.getInputStream();
 		out = s.getOutputStream();
 		senderThread = new SenderThread(this);
 		
-		new Thread(this).start();
+		this.start();
 	}
 
 	@Override
@@ -136,6 +136,12 @@ public class Link implements Runnable, IResponse{
 		} while( (!clientisClosed) );
 		// 退出循环时设置 connect--;
 		closeConnect();
+	}
+	
+	@Override
+	public synchronized void start() {
+		// TODO Auto-generated method stub
+		super.start();
 	}
 	
 	/** 

@@ -8,10 +8,10 @@ import java.util.List;
 import cn.edu.bit.web.server.config.WebConfig;
 
 public class SenderThread extends Thread {
-	private Link link;
+	private LinkThread link;
 	private List inQueue;
 
-	public SenderThread(Link link) {
+	public SenderThread(LinkThread link) {
 		this.link = link;
 		inQueue = new LinkedList();
 		this.start();
