@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import cn.edu.bit.web.server.config.WebConfig;
 
@@ -11,10 +13,14 @@ public class SenderThread extends Thread {
 	private LinkThread link;
 	private List inQueue;
 
-	public SenderThread(LinkThread link) {
+	public SenderThread(LinkThread link, ExecutorService threadPool) {
 		this.link = link;
 		inQueue = new LinkedList();
-		this.start();
+		if(threadPool==null) {
+			this.start();
+		}else {
+			threadPool.execute(this);
+		}
 	}
 	
 	public void send(InputStream in) {

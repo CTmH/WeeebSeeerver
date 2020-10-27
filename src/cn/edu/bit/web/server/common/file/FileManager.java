@@ -1,5 +1,7 @@
-package cn.edu.bit.web.server.common;
+package cn.edu.bit.web.server.common.file;
 
+import cn.edu.bit.web.server.common.HttpHeadAnalyser;
+import cn.edu.bit.web.server.common.LogSystem;
 import cn.edu.bit.web.server.config.Range;
 import cn.edu.bit.web.server.config.WebConfig;
 import cn.edu.bit.web.server.interf.IRequest;
@@ -16,7 +18,7 @@ import java.util.List;
 
 /**
  * 文件缓存管理器从程序运行时,就会一直存在,直至程序结束
- * 该类的实例只有一个,通过全局方法可以获得这个实例
+ * 该类的实例只有一个,通过全局方法可以获得这个实例，所以不采用线程池管理
  */
 public class FileManager implements IRequest {
     private static FileManager instance = new FileManager();
@@ -54,12 +56,6 @@ public class FileManager implements IRequest {
         list = new ArrayList();
         requestQueue = new LinkedList();
         new RequestQueueProcessor().start();
-
-
-        // 这里貌似没有对应的方法
-//        LogSystem.addToState(this);
-//        LogSystem.addToState(memory);
-//        LogSystem.showCacheMonitor(this);
     }
 
     /* 所有的请求必须通过ir回调!否则会出现空的线程 */
@@ -180,15 +176,15 @@ public class FileManager implements IRequest {
                     HttpHeadAnalyser hha = rd.hha;
                     InputStream in	= null;
                     try {
-                        Cache fc	= cached(rd.o);
-                        Range r 		= hha.getRange();
+                        Cache fc = cached(rd.o);
+                        Range r = hha.getRange();
 
                         if (r==NORANGE) {
-                            hha.println("HTTP/1.1 200 OK");
+                            hha.println("HTTP/1.0 200 OK");
                             in = fc.getInputStream();
                             hha.setContentLength(fc.getFileLength());
                         } else {
-                            hha.println("HTTP/1.1 206");
+                            hha.println("HTTP/1.0 206");
                             r.setLastPos(fc.getFileLength()-1);
                             in = cached(rd.o).getInputStream(r);
                             hha.setContentRange(
@@ -197,21 +193,18 @@ public class FileManager implements IRequest {
                                     fc.getFileLength() );
                             hha.setContentLength(r.getLastPos()-r.getFirstPos()+1);
                         }
-                        // TODO 不太会咋写
-//                        hha.setMimeType( MimeTypes.getMimeName(hha) );
-                        hha.printEnd();
-
-                    } catch(HTTPException e) {
-//                        hha.error(e.getHttpErrorCode(), e.toString());
+                        hha.setMimeType(hha.getMimeName());
+                        hha.printEnd();  // 此处输出了Header信息
 
                     } catch(IOException e) {
-                        // LogSystem.error(Language.clientClose+".");
-                        // donothing..
+                        LogSystem.error("客户端关闭"+".");
                     } catch(Exception e) {
                         LogSystem.error("未知的错误:"+e);
 
                     } finally {
-                        rd.ir.response( in );
+                    	if (rd.hha.isGET()){
+                    		rd.ir.response( in );
+                    	}
                         requestQueue.remove(0);
                     }
                 } else {
