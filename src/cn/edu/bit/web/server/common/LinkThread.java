@@ -89,7 +89,7 @@ public class LinkThread extends Thread implements IResponse{
 //							} else {
 //								// 对普通文件的请求,先过滤
 //								FilterSystem.exclude(sendfile);
-//								FileCacheManage.get().request(hha, this);
+//								FileManager.get().request(hha, this);
 //							}
 //							// 下面的代码在请求成功后执行
 //							++connect;
