@@ -21,14 +21,14 @@ public class WebServer implements Runnable{
 
 	
 	public WebServer(int port) {
-		// ³õÊ¼»¯ÅäÖÃÎÄ¼þ
+		// ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½
 		
 		if (port>0) {
 			WebConfig.serverPort = port;
 		}
 		this.port = WebConfig.serverPort;
 		
-		// ³õÊ¼»¯·þÎñÆ÷×´Ì¬
+		// ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬
 		stop = true;
 		socketlist = new LinkedList<LinkThread>();
 //		listener = new Listener();
@@ -40,7 +40,7 @@ public class WebServer implements Runnable{
 	}
 	
 	public final void printWelcome() {
-		System.out.println("»¶Ó­±¨¿¼±±¾©Àí¹¤´óÑ§£¡");
+		System.out.println("ï¿½ï¿½Ó­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ§ï¿½ï¿½");
 		System.out.println(LogSystem.line);
 	}
 	
@@ -50,37 +50,38 @@ public class WebServer implements Runnable{
 		try {
 			serverSocket = new ServerSocket(port);
 		} catch(IOException e) {
-			System.out.println("["+"´íÎó"+"] "+port+" "+"¶Ë¿ÚÒÑ±»Õ¼ÓÃ"+".\n\n");
+			System.out.println("["+"ï¿½ï¿½ï¿½ï¿½"+"] "+port+" "+"ï¿½Ë¿ï¿½ï¿½Ñ±ï¿½Õ¼ï¿½ï¿½"+".\n\n");
 			JOptionPane.showMessageDialog(	null, 
-											port+" "+"¶Ë¿ÚÒÑ±»Õ¼ÓÃ"+".", 
-											"´íÎó", 
+											port+" "+"ï¿½Ë¿ï¿½ï¿½Ñ±ï¿½Õ¼ï¿½ï¿½"+".", 
+											"ï¿½ï¿½ï¿½ï¿½", 
 											JOptionPane.ERROR_MESSAGE, 
 											null);
-			// Èç¹û³ö´íÓ¦¸ÃÁ¢¼´ÍË³öÏµÍ³
+			// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë³ï¿½ÏµÍ³
 			System.exit(1);
 			return;
 		}
 		
 		try {
-			System.out.println(	"·þÎñÆ÷µØÖ·"+":\t"+
+			System.out.println(	"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·"+":\t"+
 					InetAddress.getLocalHost().getHostAddress()+"/" +
 					InetAddress.getLocalHost().getHostName() );
 		}catch(Exception e) {
 			System.out.println(e);
 		}
-		System.out.println("·þÎñÆ÷¶Ë¿Ú"+":\t"+port);
-		System.out.println("·þÎñ¿ªÊ¼Ê±¼ä"+":\t"+LogSystem.getDate());
+		System.out.println("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë¿ï¿½"+":\t"+port);
+		System.out.println("ï¿½ï¿½ï¿½ï¿½Ê¼Ê±ï¿½ï¿½"+":\t"+LogSystem.getDate());
 		
 
-//		// ³õÊ¼»¯¹ýÂËÏµÍ³
+//		// ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÏµÍ³
 //		FilterSystem.init();
-//		// ³õÊ¼»¯cgi¹ÜÀíÆ÷
+//		// ï¿½ï¿½Ê¼ï¿½ï¿½cgiï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 //		Cgi_Manage.Init();
-		// ³õÊ¼»¯ÎÄ¼þ¹ÜÀíÆ÷
+		// ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		FileManager.Init();
-//		// ³õÊ¼»¯ÎÄ¼þÀàÐÍ
+		CgiResponse.Init();
+//		// ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½
 //		MimeTypes.init();
-		// ³õÊ¼»¯ÐéÄâÖ÷»úÅäÖÃ
+		// ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		VirtualHostSystem.init();
 		
 		while (!stop) {
@@ -95,24 +96,24 @@ public class WebServer implements Runnable{
 				socketlist.add(sl);
 				++totalLink;
 			} catch (IOException e) {
-				LogSystem.message("·þÎñÆ÷Á¬½ÓÕìÌý´íÎó"+":["+e+"]");
+				LogSystem.message("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"+":["+e+"]");
 			}
 		}
 	}
 
-	/** ¸Ä±ä¶Ë¿Ú */
+	/** ï¿½Ä±ï¿½Ë¿ï¿½ */
 	public void port(int p) {
 		if (stop) {
 			port = p;
 		} else {
-			throw new IllegalStateException("ÎÞ·¨¸Ä±ä¶Ë¿Ú"+".");
+			throw new IllegalStateException("ï¿½Þ·ï¿½ï¿½Ä±ï¿½Ë¿ï¿½"+".");
 		}
 	}
 	
 	public void start() {
 		new Thread(this).start();
 		new Thread(new Runnable() {
-			// ¼àÌýÁ¬½ÓµÄÏß³Ì
+			// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Óµï¿½ï¿½ß³ï¿½
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub

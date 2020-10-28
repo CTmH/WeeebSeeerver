@@ -38,7 +38,7 @@ public class LinkThread extends Thread implements IResponse{
 		if ( (o!=null) && (!stop) ) {
 			if (o instanceof InputStream) {
 				senderThread.send( (InputStream)o );
-				// »Øµ÷³É¹¦,Á¢¼´·µ»Ø
+				// ï¿½Øµï¿½ï¿½É¹ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				return;
 			} else {
 				throw new IllegalArgumentException("responsion unsupport class:"+o);
@@ -50,25 +50,25 @@ public class LinkThread extends Thread implements IResponse{
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
-		out(socket.getRemoteSocketAddress()+"SocketÁ¬½Ó.");
+		out(socket.getRemoteSocketAddress()+"Socketï¿½ï¿½ï¿½ï¿½.");
 		HttpHeadAnalyser hha = null;
-		/** Èç¹û¿Í»§¶Ë·¢³ö¹Ø±ÕÏûÏ¢Îªtrue */
+		/** ï¿½ï¿½ï¿½ï¿½Í»ï¿½ï¿½Ë·ï¿½ï¿½ï¿½ï¿½Ø±ï¿½ï¿½ï¿½Ï¢Îªtrue */
 		boolean clientisClosed = false;
 		
-		// ½øÈëÑ­»·Ç°ÉèÖÃconnect++
+		// ï¿½ï¿½ï¿½ï¿½Ñ­ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½connect++
 		++connect;
-		do { // ÏûÏ¢Ñ­»·µÄ¿ªÊ¼, Ö±µ½¿Í»§¶Ë·¢ËÍ¹Ø±ÕÁ´½ÓµÄÍ·Óò,»òÃ»ÓÐÆäËûµÄÏûÏ¢Ê±,Ñ­»·²ÅÍË³ö.
+		do { // ï¿½ï¿½Ï¢Ñ­ï¿½ï¿½ï¿½Ä¿ï¿½Ê¼, Ö±ï¿½ï¿½ï¿½Í»ï¿½ï¿½Ë·ï¿½ï¿½Í¹Ø±ï¿½ï¿½ï¿½ï¿½Óµï¿½Í·ï¿½ï¿½,ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢Ê±,Ñ­ï¿½ï¿½ï¿½ï¿½ï¿½Ë³ï¿½.
 			
 			try {
 				hha = null;
 				hha = new HttpHeadAnalyser(socket);
 			} catch (SocketTimeoutException e) {
 				LogSystem.error(socket.getRemoteSocketAddress()+
-						"Socket ³¬Ê±"+','+"¿Í»§¶Ë¼àÌý½áÊø"+".");
+						"Socket ï¿½ï¿½Ê±"+','+"ï¿½Í»ï¿½ï¿½Ë¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"+".");
 				break;
 			} catch (IOException e) {
 				LogSystem.error(socket.getRemoteSocketAddress()+
-						"¿Í»§¶Ë¹Ø±Õ"+','+"¿Í»§¶Ë¼àÌý½áÊø"+".");
+						"ï¿½Í»ï¿½ï¿½Ë¹Ø±ï¿½"+','+"ï¿½Í»ï¿½ï¿½Ë¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"+".");
 				break;
 			}
 			
@@ -82,59 +82,61 @@ public class LinkThread extends Thread implements IResponse{
 					sendfile = hha.getRequestFile();
 					if ( sendfile!=null ) {
 						try {
-							// TODO:get½âÎö
+							// TODO:getï¿½ï¿½ï¿½ï¿½
 //							if (Cgi_Manage.get().isCgi(hha)) {
-//								// ¶Ô½Å±¾ÎÄ¼þµÄÇëÇó
+//								// ï¿½Ô½Å±ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 //								Cgi_Manage.get().request(hha, this);
 //							} else {
-//								// ¶ÔÆÕÍ¨ÎÄ¼þµÄÇëÇó,ÏÈ¹ýÂË
+//								// ï¿½ï¿½ï¿½ï¿½Í¨ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½È¹ï¿½ï¿½ï¿½
 //								FilterSystem.exclude(sendfile);
 //								FileManager.get().request(hha, this);
 //							}
-//							// ÏÂÃæµÄ´úÂëÔÚÇëÇó³É¹¦ºóÖ´ÐÐ
+//							// ï¿½ï¿½ï¿½ï¿½Ä´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É¹ï¿½ï¿½ï¿½Ö´ï¿½ï¿½
 //							++connect;
-							// ÇëÇó³É¹¦¼ÌÐøÑ­»·²¢µÈ´ý»Øµ÷,
+							// ï¿½ï¿½ï¿½ï¿½É¹ï¿½ï¿½ï¿½ï¿½ï¿½Ñ­ï¿½ï¿½ï¿½ï¿½ï¿½È´ï¿½ï¿½Øµï¿½,
 							continue;
 							
 						} catch(Exception e) {
-							error("ÇëÇó´íÎó"+":"+e);
-							// »á×ªÏòÏÂÃæµÄ´úÂë--Ó¦´ðÒ»¸ö404´íÎó
+							error("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"+":"+e);
+							// ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä´ï¿½ï¿½ï¿½--Ó¦ï¿½ï¿½Ò»ï¿½ï¿½404ï¿½ï¿½ï¿½ï¿½
 						}
 					}
 					
 					hha.error(RequestErrCode.E404, hha.getRequestURI());
 					
-					error(socket.getRemoteSocketAddress()+"ÇëÇó´íÎó"+","+
-							"ÕÒ²»µ½ÎÄ¼þ"+":"+hha.getRequestURI());
+					error(socket.getRemoteSocketAddress()+"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"+","+
+							"ï¿½Ò²ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½"+":"+hha.getRequestURI());
 					
 					LogSystem.httpHead(hha);
 					break;
 					
 				} else if (hha.isPOST()) {
 					try {
-						// TODO:CGIÅäÖÃ
+						// TODO:CGIï¿½ï¿½ï¿½ï¿½
 //						Cgi_Manage.get().request(hha, this);
 //						++connect;
+						CgiResponse.get().request(hha, this);
+						++connect;
 						continue;
 						
 					} catch (Exception e) {
-						error("ÇëÇó´íÎó"+":"+e);
-						// ÆäËûµÄÎ´Öª´íÎó»áÓ¦´ðÏÂÃæµÄ´úÂë--404´íÎó
+						error("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"+":"+e);
+						// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î´Öªï¿½ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä´ï¿½ï¿½ï¿½--404ï¿½ï¿½ï¿½ï¿½
 					}
 					hha.error(RequestErrCode.E404, hha.getRequestURI());
 					LogSystem.httpHead(hha);
 				} else {
-					error("Î´ÖªÇëÇó"+":"+socket.getRemoteSocketAddress());
+					error("Î´Öªï¿½ï¿½ï¿½ï¿½"+":"+socket.getRemoteSocketAddress());
 				}
 			} else {
-				error(socket.getRemoteSocketAddress()+"HttpÍ·¶ÁÈ¡³ö´í.");
+				error(socket.getRemoteSocketAddress()+"HttpÍ·ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½.");
 			}
-			// ----- ÏÂÃæµÄ´úÂëÔÚ³ö´íÊ±Ö´ÐÐ,
-			// ³ö´íÁ¢¼´ÍË³ö
+			// ----- ï¿½ï¿½ï¿½ï¿½Ä´ï¿½ï¿½ï¿½ï¿½Ú³ï¿½ï¿½ï¿½Ê±Ö´ï¿½ï¿½,
+			// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë³ï¿½
 			break;
 			// -----
 		} while( (!clientisClosed) );
-		// ÍË³öÑ­»·Ê±ÉèÖÃ connect--;
+		// ï¿½Ë³ï¿½Ñ­ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ connect--;
 		closeConnect();
 	}
 	
@@ -145,9 +147,9 @@ public class LinkThread extends Thread implements IResponse{
 	}
 	
 	/** 
-	 * ³¢ÊÔ¹Ø±ÕÁ¬½Ó,Èç¹ûÏûÏ¢¶ÓÁÐÖÐÎª¿Õ,ÇÒ´¦ÓÚ³¬Ê±×´Ì¬<br>
-	 * closeConnect()Í¨¹ý¼ì²âÁ´½ÓÏß³ÌµÄÊýÁ¿(connect±äÁ¿)
-	 * À´ÅÐ¶ÏÊÇ·ñÓ¦¸Ã¹Ø±ÕÌ×½Ó×Ö
+	 * ï¿½ï¿½ï¿½Ô¹Ø±ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½,ï¿½Ò´ï¿½ï¿½Ú³ï¿½Ê±×´Ì¬<br>
+	 * closeConnect()Í¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß³Ìµï¿½ï¿½ï¿½ï¿½ï¿½(connectï¿½ï¿½ï¿½ï¿½)
+	 * ï¿½ï¿½ï¿½Ð¶ï¿½ï¿½Ç·ï¿½Ó¦ï¿½Ã¹Ø±ï¿½ï¿½×½ï¿½ï¿½ï¿½
 	 */
 	public void closeConnect() {
 		--connect;
@@ -162,15 +164,15 @@ public class LinkThread extends Thread implements IResponse{
 		}
 	}
 	/** 
-	 * ÕâÊÇºÜ¹Ø¼üµÄÖÕ½á±äÁ¿,Ð¡ÐÄµÄÉèÖÃËü!!! 
-	 * ÉèÖÃËûµÄ·½·¨±ØÐë'³É¶Ô'³öÏÖ
+	 * ï¿½ï¿½ï¿½ÇºÜ¹Ø¼ï¿½ï¿½ï¿½ï¿½Õ½ï¿½ï¿½ï¿½ï¿½,Ð¡ï¿½Äµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½!!! 
+	 * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½'ï¿½É¶ï¿½'ï¿½ï¿½ï¿½ï¿½
 	 * 
-	 * Ã¿µ±Ò»¸öÐÂµÄ<b>Á´½ÓÏß³Ì</b>±»½¨Á¢,connect¼ÓÒ»,
-	 * µ±<b>Á´½ÓÏß³Ì</b>ÍË³ö,connect¼õÒ»
+	 * Ã¿ï¿½ï¿½Ò»ï¿½ï¿½ï¿½Âµï¿½<b>ï¿½ï¿½ï¿½ï¿½ï¿½ß³ï¿½</b>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,connectï¿½ï¿½Ò»,
+	 * ï¿½ï¿½<b>ï¿½ï¿½ï¿½ï¿½ï¿½ß³ï¿½</b>ï¿½Ë³ï¿½,connectï¿½ï¿½Ò»
 	 */
 	private volatile int connect = 0;
 	
-	/** ¼ì²éÕâ´ÎÎÕÊÖÊÇ·ñÒÑ¾­½áÊø */
+	/** ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½ï¿½ */
 	public boolean isDisconnect() {
 		return stop;
 	}
@@ -194,16 +196,16 @@ public class LinkThread extends Thread implements IResponse{
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			LogSystem.message("Ð´ÎÄ¼þÁ÷Ê§°Ü");
+			LogSystem.message("Ð´ï¿½Ä¼ï¿½ï¿½ï¿½Ê§ï¿½ï¿½");
 		}
 		return 0;
 	}
 	
-	/** Í¨¹ýLogSystem´òÓ¡ÐÅÏ¢ */
+	/** Í¨ï¿½ï¿½LogSystemï¿½ï¿½Ó¡ï¿½ï¿½Ï¢ */
 	private final void out(Object o) {
 		LogSystem.message(o.toString());
 	}
-	/** Í¨¹ýLogSystem´òÓ¡´íÎóÐÅÏ¢ */
+	/** Í¨ï¿½ï¿½LogSystemï¿½ï¿½Ó¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ */
 	private final void error(Object o) {
 		LogSystem.error(o.toString());
 	}
