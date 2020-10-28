@@ -8,9 +8,11 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
+import java.util.concurrent.ExecutorService;
 
 import cn.edu.bit.web.server.interf.IResponse;
 import cn.edu.bit.web.server.config.WebConfig;
+import cn.edu.bit.web.server.common.file.FileManager;
 import cn.edu.bit.web.server.config.RequestErrCode;
 
 public class LinkThread extends Thread implements IResponse{
@@ -22,14 +24,17 @@ public class LinkThread extends Thread implements IResponse{
 	private File sendfile;
 	private SenderThread senderThread;
 	
-	public LinkThread(Socket s) throws IOException {
+	public LinkThread(Socket s, ExecutorService threadPool) throws IOException {
 		socket = s;
 		socket.setSoTimeout(WebConfig.socketReadOuttime);
 		in  = s.getInputStream();
 		out = s.getOutputStream();
-		senderThread = new SenderThread(this);
-		
-		this.start();
+		senderThread = new SenderThread(this, threadPool);
+		if(threadPool==null) {
+			this.start();
+		}else {
+			threadPool.execute(this);
+		}
 	}
 
 	@Override
@@ -78,7 +83,7 @@ public class LinkThread extends Thread implements IResponse{
 				hha.setBasePath( VirtualHostSystem.getVhost(hha) );
 				
 				
-				if (hha.isGET()) {
+				if (hha.isGET()||hha.isHEAD()) {
 					sendfile = hha.getRequestFile();
 					if ( sendfile!=null ) {
 						try {
@@ -91,8 +96,13 @@ public class LinkThread extends Thread implements IResponse{
 //								FilterSystem.exclude(sendfile);
 //								FileManager.get().request(hha, this);
 //							}
-//							// 下面的代码在请求成功后执行
-//							++connect;
+							if(WebConfig.secretFiles.contains(hha.getRequestFile().getName())) {
+								hha.error(RequestErrCode.E403, hha.getRequestURI());
+								continue;
+							}
+							FileManager.get().request(hha, this);
+							// 下面的代码在请求成功后执行
+							++connect;
 							// 请求成功继续循环并等待回调,
 							continue;
 							
@@ -127,6 +137,7 @@ public class LinkThread extends Thread implements IResponse{
 					error("未知请求"+":"+socket.getRemoteSocketAddress());
 				}
 			} else {
+				hha.error(RequestErrCode.E400, hha.getRequestURI());
 				error(socket.getRemoteSocketAddress()+"Http头读取出错.");
 			}
 			// ----- 下面的代码在出错时执行,

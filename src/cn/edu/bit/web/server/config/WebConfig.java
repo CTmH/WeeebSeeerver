@@ -1,7 +1,9 @@
 package cn.edu.bit.web.server.config;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class WebConfig {
 	private WebConfig() {}
@@ -14,7 +16,7 @@ public class WebConfig {
 	public static String language = "Chinese.txt";
 	
 	/** 默认的主页文件 */
-	public static String defaultRootPath = "default";
+	public static String defaultRootPath = ".";  // 直接根目录
 	
 	/** 网站主页根文件夹 */
 	public static String webRootPath = "website";
@@ -24,6 +26,7 @@ public class WebConfig {
 	
 	/** 服务器的最大连接数 */
 	public static int maxConnect = 1000;
+	public static int maxThread = 1024;
 	
 	/** 限制每个IP的最大链接数,为'0'不限制 实现原理参考LinkedIPArray类的说明 */
 	public static int ipConnectLimit = 5;
@@ -84,6 +87,11 @@ public class WebConfig {
 	/** 虚拟主机配置文件 */
 	public static String virtualHost = "host.conf";
 	public static Map<String, String> hostsMap = new HashMap<String, String>(){
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
 		{
 			put("testfile","text.txt");
 		}
@@ -100,5 +108,17 @@ public class WebConfig {
 	
 	/** Mime 文件类型配置文件 */
 	public static String miniTypeConf = "mime.types.conf";
+	
+	/** 机密文件*/
+	public static Set<String> secretFiles=new HashSet<String>() {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		{
+			add("secure.txt");
+		}
+	};
 	
 }

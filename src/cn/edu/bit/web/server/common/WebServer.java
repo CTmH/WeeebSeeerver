@@ -6,18 +6,25 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.swing.JOptionPane;
 
+import cn.edu.bit.web.server.common.file.FileManager;
 import cn.edu.bit.web.server.config.WebConfig;
 
 public class WebServer implements Runnable{
 	
 	private ServerSocket serverSocket;
 	private boolean stop=true;
-	private List<LinkThread> socketlist;
+	private Queue<Socket> socketlist;
 	private int port;
 	private long totalLink = 0;
+	
+	private ExecutorService threadPool=Executors.newFixedThreadPool(WebConfig.maxThread);
 
 	
 	public WebServer(int port) {
@@ -30,7 +37,7 @@ public class WebServer implements Runnable{
 		
 		// 初始化服务器状态
 		stop = true;
-		socketlist = new LinkedList<LinkThread>();
+		socketlist = new LinkedBlockingQueue<Socket>();
 //		listener = new Listener();
 //		printWelcome();
 	}
@@ -86,13 +93,17 @@ public class WebServer implements Runnable{
 		while (!stop) {
 			while (socketlist.size()>=WebConfig.maxConnect) {
 				try {
+					socketlist.remove().close();  // 之后线程自己报错结束
 					Thread.sleep(1000);
-				} catch (InterruptedException e) {}
+				} catch (InterruptedException ie) {}
+				catch (Exception e) {
+					LogSystem.message("服务器关闭旧连接错误"+":["+e+"]");
+				}
 			}
 			try {
-				Socket soket = serverSocket.accept();
-				LinkThread sl = new LinkThread(soket);
-				socketlist.add(sl);
+				Socket socket = serverSocket.accept();
+				LinkThread sl = new LinkThread(socket, threadPool);
+				socketlist.add(socket);
 				++totalLink;
 			} catch (IOException e) {
 				LogSystem.message("服务器连接侦听错误"+":["+e+"]");
@@ -111,26 +122,6 @@ public class WebServer implements Runnable{
 	
 	public void start() {
 		new Thread(this).start();
-		new Thread(new Runnable() {
-			// 监听连接的线程
-			@Override
-			public void run() {
-				// TODO Auto-generated method stub
-				while (!stop || socketlist.size()!=0) {
-					
-					for (int i=0; i<socketlist.size(); ++i) {
-						LinkThread is = (LinkThread)socketlist.get(i);
-						if (is.isDisconnect()) {
-							socketlist.remove(is);
-						}
-					}
-					
-					try {
-						Thread.sleep(500);
-					} catch (InterruptedException e) {}
-				}
-			}
-		}).start();
 		stop = false;
 	}
 	

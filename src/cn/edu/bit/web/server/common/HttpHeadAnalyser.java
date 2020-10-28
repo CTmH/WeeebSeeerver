@@ -74,6 +74,7 @@ public class HttpHeadAnalyser {
 		InputStream in  = clietSocket.getInputStream();
 		OutputStream out= clietSocket.getOutputStream();
 		socket = clietSocket;
+		this.out = out;
 		
 		StringBuffer sb = new StringBuffer();
 		String readline = readLine(in);
@@ -97,7 +98,6 @@ public class HttpHeadAnalyser {
 				messBody = body;
 			}
 		}
-		this.out = out;
 	}
 	
 	/** 把对目录的请求尝试转换成为对请求目录的主页的请求 */
@@ -128,7 +128,7 @@ public class HttpHeadAnalyser {
 		bod.append("<html><body><h1><font color=\"#FF0000\">Error "+
 					num+".</font></h1><hr/>" +
 					"<font size=\"+1\" color=\"#999999\">"+
-					message+"找不到相关的资源"+".</font><p></body></html>");
+					message+"的服务器处理似乎有一点问题"+".</font><p></body></html>");
 		
 		buf.append("HTTP/1.0 "+num+" "+cr+lf);
 		buf.append("Connection:close"+cr+lf);
@@ -316,6 +316,14 @@ public class HttpHeadAnalyser {
 	}
 	
 	/**
+	 * 寻找指定文件的Mini类型
+	 * @return - Mini类型字符串,找不到返回null
+	 */
+	public String getMimeName() {
+		return null;
+	}
+	
+	/**
 	 * 返回HTTP请求的方法(GET,POST,PUT...)
 	 * @return 找不到返回null;
 	 */
@@ -325,12 +333,13 @@ public class HttpHeadAnalyser {
 	}
 	
 	public boolean isGET() {
-		if (httphead.startsWith(GET)) return true;
-		return false;
+		return httphead.startsWith(GET);
 	}
 	public boolean isPOST() {
-		if (httphead.startsWith(POST)) return true;
-		return false;
+		return httphead.startsWith(POST);
+	}
+	public boolean isHEAD() {
+		return httphead.startsWith(HEAD);
 	}
 	
 	/**
@@ -407,7 +416,6 @@ public class HttpHeadAnalyser {
 	
 	/** 
 	 * 设置消息体长度 
-	 * HTTP/1.1 [14.13] 
 	 * Content-Length - Content-Length = “Content-Length” “:” 1*DIGIT 
 	 */
 	public final void setContentLength(long l) throws IOException {
@@ -423,8 +431,6 @@ public class HttpHeadAnalyser {
 	
 	/**
 	 * 设置消息体的从属范围,参数的正确性由调用者负责
-		<pre>
-		HTTP/1.1 [14.16]
 		Content-Range = "Content-Range" ":" content-range-spec
 		content-range-spec = byte-content-range-spec
 		byte-content-range-spec = bytes-unit SP byte-range-resp-spec "/"( instance-length | "*" )

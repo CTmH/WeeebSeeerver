@@ -1,5 +1,6 @@
-package cn.edu.bit.web.server.common;
+package cn.edu.bit.web.server.common.file;
 
+import cn.edu.bit.web.server.common.LogSystem;
 import cn.edu.bit.web.server.config.Range;
 import cn.edu.bit.web.server.config.WebConfig;
 
