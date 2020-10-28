@@ -125,6 +125,8 @@ public class LinkThread extends Thread implements IResponse{
 						// TODO:CGI≈‰÷√
 //						Cgi_Manage.get().request(hha, this);
 //						++connect;
+						CgiResponse.get().request(hha, this);	
+						++connect;
 						continue;
 						
 					} catch (Exception e) {

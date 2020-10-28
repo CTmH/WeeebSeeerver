@@ -85,6 +85,7 @@ public class WebServer implements Runnable{
 //		Cgi_Manage.Init();
 		// 初始化文件管理器
 		FileManager.Init();
+		CgiResponse.Init();
 //		// 初始化文件类型
 //		MimeTypes.init();
 		// 初始化虚拟主机配置
