@@ -1,8 +1,7 @@
 package cn.edu.bit.web.server.common.file;
 
 import cn.edu.bit.web.server.common.HttpHeadAnalyser;
-import cn.edu.bit.web.server.common.LogSystem;
-import cn.edu.bit.web.server.config.Range;
+import cn.edu.bit.web.server.common.Logger;
 import cn.edu.bit.web.server.config.WebConfig;
 import cn.edu.bit.web.server.interf.IRequest;
 import cn.edu.bit.web.server.interf.IResponse;
@@ -177,29 +176,18 @@ public class FileManager implements IRequest {
                     InputStream in	= null;
                     try {
                         Cache fc = cached(rd.o);
-                        Range r = hha.getRange();
 
-                        if (r==NORANGE) {
-                            hha.println("HTTP/1.0 200 OK");
-                            in = fc.getInputStream();
-                            hha.setContentLength(fc.getFileLength());
-                        } else {
-                            hha.println("HTTP/1.0 206");
-                            r.setLastPos(fc.getFileLength()-1);
-                            in = cached(rd.o).getInputStream(r);
-                            hha.setContentRange(
-                                    r.getFirstPos(),
-                                    r.getLastPos(),
-                                    fc.getFileLength() );
-                            hha.setContentLength(r.getLastPos()-r.getFirstPos()+1);
-                        }
+                        hha.println("HTTP/1.0 200 OK");
+                        in = fc.getInputStream();
+                        hha.setContentLength(fc.getFileLength());
+
                         hha.setMimeType(hha.getMimeName());
                         hha.printEnd();  // 此处输出了Header信息
 
                     } catch(IOException e) {
-                        LogSystem.error("客户端关闭"+".");
+                        Logger.error("客户端关闭"+".");
                     } catch(Exception e) {
-                        LogSystem.error("未知的错误:"+e);
+                        Logger.error("未知的错误:"+e);
 
                     } finally {
                     	if (rd.hha.isGET()){
@@ -235,7 +223,7 @@ public class FileManager implements IRequest {
     }
 
     private void out(Object o) {
-        LogSystem.message(o);
+        Logger.message(o);
     }
 
     public String getName() {

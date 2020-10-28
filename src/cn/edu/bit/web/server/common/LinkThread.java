@@ -55,7 +55,7 @@ public class LinkThread extends Thread implements IResponse{
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
-		out(socket.getRemoteSocketAddress()+"Socket连接.");
+		Logger.message(socket.getRemoteSocketAddress()+"Socket连接.");
 		HttpHeadAnalyser hha = null;
 		/** 如果客户端发出关闭消息为true */
 		boolean clientisClosed = false;
@@ -68,13 +68,11 @@ public class LinkThread extends Thread implements IResponse{
 				hha = null;
 				hha = new HttpHeadAnalyser(socket);
 			} catch (SocketTimeoutException e) {
-				LogSystem.error(socket.getRemoteSocketAddress()+
+				Logger.error(socket.getRemoteSocketAddress()+
 						"Socket 超时"+','+"客户端监听结束"+".");
-				break;
 			} catch (IOException e) {
-				LogSystem.error(socket.getRemoteSocketAddress()+
+				Logger.error(socket.getRemoteSocketAddress()+
 						"客户端关闭"+','+"客户端监听结束"+".");
-				break;
 			}
 			
 			if (hha!=null) {
@@ -87,15 +85,7 @@ public class LinkThread extends Thread implements IResponse{
 					sendfile = hha.getRequestFile();
 					if ( sendfile!=null ) {
 						try {
-							// TODO:get解析
-//							if (Cgi_Manage.get().isCgi(hha)) {
-//								// 对脚本文件的请求
-//								Cgi_Manage.get().request(hha, this);
-//							} else {
-//								// 对普通文件的请求,先过滤
-//								FilterSystem.exclude(sendfile);
-//								FileManager.get().request(hha, this);
-//							}
+							// 对文件可访问性验证，不能访问返回403
 							if(WebConfig.secretFiles.contains(hha.getRequestFile().getName())) {
 								hha.error(RequestErrCode.E403, hha.getRequestURI());
 								continue;
@@ -103,44 +93,57 @@ public class LinkThread extends Thread implements IResponse{
 							FileManager.get().request(hha, this);
 							// 下面的代码在请求成功后执行
 							++connect;
-							// 请求成功继续循环并等待回调,
+							// 请求成功，继续循环并等待回调,
 							continue;
 							
 						} catch(Exception e) {
-							error("请求错误"+":"+e);
+							Logger.error("请求错误"+":"+e);
 							// 会转向下面的代码--应答一个404错误
 						}
 					}
 					
 					hha.error(RequestErrCode.E404, hha.getRequestURI());
 					
-					error(socket.getRemoteSocketAddress()+"请求错误"+","+
+					Logger.error(socket.getRemoteSocketAddress()+"请求错误"+","+
 							"找不到文件"+":"+hha.getRequestURI());
 					
-					LogSystem.httpHead(hha);
+					Logger.httpHead(hha);
 					break;
 					
 				} else if (hha.isPOST()) {
 					try {
-						// TODO:CGI配置
-//						Cgi_Manage.get().request(hha, this);
-//						++connect;
-						CgiResponse.get().request(hha, this);	
+						// CGI配置
+						CgiManager.get().request(hha, this);	
 						++connect;
 						continue;
 						
 					} catch (Exception e) {
-						error("请求错误"+":"+e);
+						Logger.error("请求错误"+":"+e);
 						// 其他的未知错误会应答下面的代码--404错误
 					}
 					hha.error(RequestErrCode.E404, hha.getRequestURI());
-					LogSystem.httpHead(hha);
+					Logger.httpHead(hha);
 				} else {
-					error("未知请求"+":"+socket.getRemoteSocketAddress());
+					Logger.error("未知请求"+":"+socket.getRemoteSocketAddress());
 				}
 			} else {
-				hha.error(RequestErrCode.E400, hha.getRequestURI());
-				error(socket.getRemoteSocketAddress()+"Http头读取出错.");
+				StringBuffer buf = new StringBuffer();
+				StringBuffer bod = new StringBuffer();
+				bod.append("<html><body><h1><font color=\"#FF0000\">Error "+
+							400+".</font></h1><hr/>" +
+							"<font size=\"+1\" color=\"#999999\">"+
+							"请求格式不合法！"+".</font><p></body></html>");
+				
+				buf.append("HTTP/1.0 "+40+" "+HttpHeadAnalyser.cr+HttpHeadAnalyser.lf);
+				buf.append("Connection:close"+HttpHeadAnalyser.cr+HttpHeadAnalyser.lf);
+				buf.append("Content-Length:"+bod.toString().getBytes().length+HttpHeadAnalyser.cr+HttpHeadAnalyser.lf);
+				buf.append(""+HttpHeadAnalyser.cr+HttpHeadAnalyser.lf);  // 不然会变成字符加法
+				
+				try {
+					out.write(buf.toString().getBytes());
+					out.write(bod.toString().getBytes());
+				} catch (IOException e) {}
+				Logger.error(socket.getRemoteSocketAddress()+"Http头读取出错.");
 			}
 			// ----- 下面的代码在出错时执行,
 			// 出错立即退出
@@ -158,14 +161,13 @@ public class LinkThread extends Thread implements IResponse{
 	}
 	
 	/** 
-	 * 尝试关闭连接,如果消息队列中为空,且处于超时状态<br>
-	 * closeConnect()通过检测链接线程的数量(connect变量)
-	 * 来判断是否应该关闭套接字
+	 * 如果消息队列中为空,且处于超时状态或发生异常，尝试关闭连接
+	 * 通过检测链接线程的数量(connect变量)来判断是否应该关闭套接字
 	 */
 	public void closeConnect() {
 		--connect;
 		if (connect<=0) {
-			out(socket.getRemoteSocketAddress()+"Closed!");
+			Logger.message(socket.getRemoteSocketAddress()+"Closed!");
 			try {
 				in.close();
 				out.close();
@@ -175,9 +177,6 @@ public class LinkThread extends Thread implements IResponse{
 		}
 	}
 	/** 
-	 * 这是很关键的终结变量,小心的设置它!!! 
-	 * 设置他的方法必须'成对'出现
-	 * 
 	 * 每当一个新的<b>链接线程</b>被建立,connect加一,
 	 * 当<b>链接线程</b>退出,connect减一
 	 */
@@ -207,17 +206,8 @@ public class LinkThread extends Thread implements IResponse{
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			LogSystem.message("写文件流失败");
+			Logger.message("写文件流失败");
 		}
 		return 0;
-	}
-	
-	/** 通过LogSystem打印信息 */
-	private final void out(Object o) {
-		LogSystem.message(o.toString());
-	}
-	/** 通过LogSystem打印错误信息 */
-	private final void error(Object o) {
-		LogSystem.error(o.toString());
 	}
 }

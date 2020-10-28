@@ -1,7 +1,6 @@
 package cn.edu.bit.web.server.common.file;
 
-import cn.edu.bit.web.server.common.LogSystem;
-import cn.edu.bit.web.server.config.Range;
+import cn.edu.bit.web.server.common.Logger;
 import cn.edu.bit.web.server.config.WebConfig;
 
 import java.io.*;
@@ -71,39 +70,24 @@ public class Cache {
      * @return java.io.InputStream
      * @throws IOException - 文件操作错误,抛出这个异常
      */
-    public InputStream getInputStream(Range range)
+    public InputStream getInputStream()
             throws Exception
     {
-        boolean recached = false;
         if (isModified()) {
-            LogSystem.error("文件被更改需重新缓冲:"+filename);
+            Logger.error("文件被更改需重新缓冲:"+filename);
             if (reCacheFile()) {
-                recached = true;
-                LogSystem.error("文件缓冲完成.");
+                Logger.error("文件缓冲完成.");
             } else {
-                LogSystem.error("不能重缓冲,有另一个线程正在访问这个缓冲.");
-            }
-        }
-        if (range==null) {
-            range = new Range(0, fileLength-1);
-        } else {
-            if (recached) {
-                throw new Exception("文件被更改,范围失效,请求需重新递交.");
-            }
-            boolean n1 = range.getFirstPos()<0;
-            boolean n2 = range.getLastPos()>fileLength-1;
-            boolean n3 = range.getFirstPos()>=range.getLastPos();
-            if (n1 || n2 || n3) {
-                throw new Exception("范围参数不合法.");
+                Logger.error("不能重缓冲,有另一个线程正在访问这个缓冲.");
             }
         }
         ++usecount;
         if (state==CACHED) {
-            return new CacheStream(range);
+            return new CacheStream();
         }
         else if (state==NOCACHE) {
             try {
-                return new FileStream(filename, range);
+                return new FileStream(filename);
             } catch(FileNotFoundException e) {
                 release();
                 throw e;
@@ -112,17 +96,6 @@ public class Cache {
         else {
             throw new IllegalStateException();
         }
-    }
-
-    /**
-     * 得到文件<b>全部范围</b>的输入流,输入流可能来自缓冲,也可能来自文件系统,这取决于当前的状态
-     * @return java.io.InputStream
-     * @throws Exception - 文件操作错误或当Range参数的请求超过文件的实际大小,抛出这个异常
-     */
-    public InputStream getInputStream()
-            throws Exception
-    {
-        return getInputStream(null);
     }
 
     /**
@@ -226,12 +199,10 @@ public class Cache {
     /** 缓冲流包装 */
     private class CacheStream extends InputStream {
         private int readcount = 0;
-        private Range range;
 
         /** 必须保证Range的正确性 */
-        public CacheStream(Range r) {
+        public CacheStream() {
             ++reference;
-            range = r;
         }
 
         public int read() throws IOException {
@@ -248,19 +219,16 @@ public class Cache {
     }
 
     private class FileStream extends FileInputStream {
-        private Range range;
         private long current;
 
         /** 必须保证Range的正确性 */
-        public FileStream(File f, Range r) throws IOException {
+        public FileStream(File f) throws IOException {
             super(f);
-            range = r;
-            this.skip(r.getFirstPos());
-            current = r.getFirstPos();
+            current = 0;
         }
 
         public int read() throws IOException {
-            if (current<=range.getLastPos()) {
+            if (current<=fileLength-1) {
                 return super.read();
             } else {
                 return -1;

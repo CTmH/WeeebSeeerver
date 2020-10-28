@@ -13,10 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import cn.edu.bit.web.server.config.Range;
 import cn.edu.bit.web.server.config.WebConfig;
 
-// CatfoOD 2008.3.11
 
 public class HttpHeadAnalyser {
 	
@@ -25,24 +23,11 @@ public class HttpHeadAnalyser {
 		"Content-Type", "Content-Length", "Cache-Control",
 		"Accept-Encoding", "UA-CPU",
 	};
-	/** 回车 */
 	public static final char cr = '\r';
-
-	/** 换行 */
 	public static final char lf = '\n';
 	
-	/* ------------------------------------------------------------------------
-	 *  方法标记指示了在被Request-URI指定的资源上执行的方法。这种方法是大小写敏感的。
- 	 *	Method = "OPTIONS"                    
-     *        | "GET"                      
-     *        | "HEAD" 
-     *        | "POST"  
-     *        | "PUT"   
-     *        | "DELETE" 
-     *        | "TRACE"  
-     *        | "CONNECT"  
-     *        | extension-method 
-	 *	Extension-method = token 
+	/**
+	 **  指示了在被Request-URI指定的资源上执行的方法。大小写敏感。
 	 */
 	public final String GET 	= "GET";
 	public final String HEAD	= "HEAD";
@@ -60,12 +45,11 @@ public class HttpHeadAnalyser {
 	private String basePath = "";
 	private StringBuffer outMessageHead = new StringBuffer();
 	
-	// { ------------ 缓冲
 	private String requesturi = null;
 	private File requestfile = null;
 	private String host = null;
 	private String referer = null;
-	// } ------------
+
 	private Socket socket;
 	
 	public HttpHeadAnalyser(Socket clietSocket) 
@@ -117,10 +101,23 @@ public class HttpHeadAnalyser {
 		return f;
 	}
 	
+	/** 返回一个由s指定的Request域并且去掉了首尾空字符, 失败返回null */
+	public String get(String s) {
+		int start = httphead.indexOf(s);
+		int end = httphead.indexOf('\n', start);
+
+		if (start>=0 && end<=httphead.length() && end>0) {
+			if (httphead.charAt(start+s.length())==':') {
+				return httphead.substring(start+s.length()+1, end).trim();
+			}
+		}
+		return null;
+	}
+	
 	/**
-	 * 向客户端发送错误代码,并<b>结束</b>消息响应头域,<b>关闭</b>与客户端的链接
+	 * 发送错误代码,并结束消息响应Header,关闭与客户端的链接
 	 * @param num - 错误代码
-	 * @param message - 相关的消息
+	 * @param message - 错误消息
 	 */
 	public void error(int num, String message) {
 		StringBuffer buf = new StringBuffer();
@@ -142,21 +139,8 @@ public class HttpHeadAnalyser {
 		closed = true;
 	}
 	
-	/** 返回一个由s指定的Request域并且去掉了首尾空字符, 失败返回null */
-	public String get(String s) {
-		int start = httphead.indexOf(s);
-		int end = httphead.indexOf('\n', start);
-
-		if (start>=0 && end<=httphead.length() && end>0) {
-			if (httphead.charAt(start+s.length())==':') {
-				return httphead.substring(start+s.length()+1, end).trim();
-			}
-		}
-		return null;
-	}
-	
 	/**
-	 * uri中?后面的字符串
+	 * uri中拼接在?后面的字符串
 	 * @return null-没有参数
 	 */
 	public String getArguments() {
@@ -291,20 +275,6 @@ public class HttpHeadAnalyser {
 			System.err.println("Url解析错误"+":"+uri);
 		}
 		return uri;
-	}
-	
-	/**
-	 * 得到请求头域中范围的请求数据,Range类负责解析并包装范围;
-	 * @return - 如果请求中没有范围头域返回null
-	 * @throws Exception - 如果请求中包含"Range"域,但格式不正确,抛出这个异常
-	 */
-	public Range getRange() throws Exception {
-		String range = get("Range");
-		// 范围请求头域必须以 "bytes" 字符串为起始
-		if (range!=null) {
-			return new Range(range);
-		}
-		return null;
 	}
 	
 	/**
