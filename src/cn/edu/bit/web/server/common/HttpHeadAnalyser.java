@@ -373,6 +373,8 @@ public class HttpHeadAnalyser {
 				}
 				return new String(bytes);
 			}
+		}else if (read==-1) {
+			return "";
 		}
 		throw new IOException("当前行不以CRLF结尾"+".");
 	}

@@ -70,7 +70,9 @@ public class LinkThread extends Thread implements IResponse{
 			} catch (SocketTimeoutException e) {
 				Logger.error(socket.getRemoteSocketAddress()+
 						"Socket 超时"+','+"客户端监听结束"+".");
+				break;
 			} catch (IOException e) {
+				// e.printStackTrace();
 				Logger.error(socket.getRemoteSocketAddress()+
 						"客户端关闭"+','+"客户端监听结束"+".");
 			}
@@ -93,8 +95,8 @@ public class LinkThread extends Thread implements IResponse{
 							FileManager.get().request(hha, this);
 							// 下面的代码在请求成功后执行
 							++connect;
-							// 请求成功，继续循环并等待回调,
-							continue;
+							// 请求成功，这个处理可以结束，之后由自己或者其他线程关闭socket
+							break;
 							
 						} catch(Exception e) {
 							Logger.error("请求错误"+":"+e);
@@ -115,7 +117,7 @@ public class LinkThread extends Thread implements IResponse{
 						// CGI配置
 						CgiManager.get().request(hha, this);	
 						++connect;
-						continue;
+						break;
 						
 					} catch (Exception e) {
 						Logger.error("请求错误"+":"+e);
@@ -124,6 +126,22 @@ public class LinkThread extends Thread implements IResponse{
 					hha.error(RequestErrCode.E404, hha.getRequestURI());
 					Logger.httpHead(hha);
 				} else {
+					StringBuffer buf = new StringBuffer();
+					StringBuffer bod = new StringBuffer();
+					bod.append("<html><body><h1><font color=\"#FF0000\">Error "+
+								400+".</font></h1><hr/>" +
+								"<font size=\"+1\" color=\"#999999\">"+
+								"请求格式不合法！"+".</font><p></body></html>");
+					
+					buf.append("HTTP/1.0 "+400+" "+HttpHeadAnalyser.cr+HttpHeadAnalyser.lf);
+					buf.append("Connection:close"+HttpHeadAnalyser.cr+HttpHeadAnalyser.lf);
+					buf.append("Content-Length:"+bod.toString().getBytes().length+HttpHeadAnalyser.cr+HttpHeadAnalyser.lf);
+					buf.append(""+HttpHeadAnalyser.cr+HttpHeadAnalyser.lf);  // 不然会变成字符加法
+					
+					try {
+						out.write(buf.toString().getBytes());
+						out.write(bod.toString().getBytes());
+					} catch (IOException e) {}
 					Logger.error("未知请求"+":"+socket.getRemoteSocketAddress());
 				}
 			} else {
@@ -134,7 +152,7 @@ public class LinkThread extends Thread implements IResponse{
 							"<font size=\"+1\" color=\"#999999\">"+
 							"请求格式不合法！"+".</font><p></body></html>");
 				
-				buf.append("HTTP/1.0 "+40+" "+HttpHeadAnalyser.cr+HttpHeadAnalyser.lf);
+				buf.append("HTTP/1.0 "+400+" "+HttpHeadAnalyser.cr+HttpHeadAnalyser.lf);
 				buf.append("Connection:close"+HttpHeadAnalyser.cr+HttpHeadAnalyser.lf);
 				buf.append("Content-Length:"+bod.toString().getBytes().length+HttpHeadAnalyser.cr+HttpHeadAnalyser.lf);
 				buf.append(""+HttpHeadAnalyser.cr+HttpHeadAnalyser.lf);  // 不然会变成字符加法
@@ -205,7 +223,7 @@ public class LinkThread extends Thread implements IResponse{
 			return 1;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// e.printStackTrace();
 			Logger.message("写文件流失败");
 		}
 		return 0;
