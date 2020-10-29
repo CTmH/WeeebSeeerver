@@ -24,7 +24,7 @@ public class WebServer implements Runnable{
 	private int port;
 	private long totalLink = 0;
 	
-	private ExecutorService threadPool=Executors.newFixedThreadPool(WebConfig.maxThread);
+	private ExecutorService threadPool=null;
 
 	
 	public WebServer(int port) {
@@ -48,7 +48,7 @@ public class WebServer implements Runnable{
 	
 	public final void printWelcome() {
 		System.out.println("欢迎报考北京理工大学！");
-		System.out.println(LogSystem.line);
+		System.out.println(Logger.line);
 	}
 	
 	@Override
@@ -76,7 +76,7 @@ public class WebServer implements Runnable{
 			System.out.println(e);
 		}
 		System.out.println("服务器端口"+":\t"+port);
-		System.out.println("服务开始时间"+":\t"+LogSystem.getDate());
+		System.out.println("服务开始时间"+":\t"+Logger.getDate());
 		
 
 //		// 初始化过滤系统
@@ -85,7 +85,7 @@ public class WebServer implements Runnable{
 //		Cgi_Manage.Init();
 		// 初始化文件管理器
 		FileManager.Init();
-		CgiResponse.Init();
+		CgiManager.Init();
 //		// 初始化文件类型
 //		MimeTypes.init();
 		// 初始化虚拟主机配置
@@ -98,7 +98,7 @@ public class WebServer implements Runnable{
 					Thread.sleep(1000);
 				} catch (InterruptedException ie) {}
 				catch (Exception e) {
-					LogSystem.message("服务器关闭旧连接错误"+":["+e+"]");
+					Logger.message("服务器关闭旧连接错误"+":["+e+"]");
 				}
 			}
 			try {
@@ -107,7 +107,7 @@ public class WebServer implements Runnable{
 				socketlist.add(socket);
 				++totalLink;
 			} catch (IOException e) {
-				LogSystem.message("服务器连接侦听错误"+":["+e+"]");
+				Logger.message("服务器连接侦听错误"+":["+e+"]");
 			}
 		}
 	}
@@ -122,6 +122,7 @@ public class WebServer implements Runnable{
 	}
 	
 	public void start() {
+		threadPool=Executors.newFixedThreadPool(WebConfig.maxThread);
 		new Thread(this).start();
 		stop = false;
 	}

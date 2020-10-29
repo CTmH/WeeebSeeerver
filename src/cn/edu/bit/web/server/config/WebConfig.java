@@ -16,7 +16,7 @@ public class WebConfig {
 	public static String language = "Chinese.txt";
 	
 	/** 默认的主页文件 */
-	public static String defaultRootPath = ".";  // 直接根目录
+	public static String defaultRootPath = "default";  // 直接根目录
 	
 	/** 网站主页根文件夹 */
 	public static String webRootPath = "website";
@@ -99,6 +99,7 @@ public class WebConfig {
 	
 	/** CGI 配置文件 */
 	public static String cgiConf = "cgi.conf";
+	public static String pythonIntepreter = "E:/Anaconda3/python.exe";
 	
 	/** 过滤器配置文件 */
 	public static String exclude = "exclude.conf";

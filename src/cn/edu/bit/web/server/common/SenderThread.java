@@ -69,7 +69,7 @@ public class SenderThread extends Thread {
 				}
 				
 			} catch (IOException e) {
-				LogSystem.error(link.getRemoteSocketAddress()+"文件发送错误"+":"+
+				Logger.error(link.getRemoteSocketAddress()+"文件发送错误"+":"+
 						link.getFile()+" "+"客户端关闭链接"+".");
 			//	error("详细信息:"+e.getLocalizedMessage());
 			} finally {

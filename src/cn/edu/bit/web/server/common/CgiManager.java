@@ -5,30 +5,31 @@ import cn.edu.bit.web.server.interf.IRequest;
 import cn.edu.bit.web.server.interf.IResponse;
 
 import java.io.*;
+import java.util.concurrent.TimeUnit;
 
-public final class CgiResponse implements IRequest{
+public final class CgiManager implements IRequest{
 
-    private final static CgiResponse me = new CgiResponse();
+    private final static CgiManager me = new CgiManager();
 
     public static void Init() {}
 
-    public static final CgiResponse get(){
+    public static final CgiManager get(){
         return me;
     }
 
     private int count = 0;
     private BuildInCgi[] cgis=new BuildInCgi[2];
 
-    private CgiResponse(){
+    private CgiManager(){
         //初始化
         cgis[0] = new BuildInCgi(
             "mycalc.exe",
-            ".\\website\\default\\cgi-bin\\mycalc.exe",     //路径路径路径路径路径路径
+            ".\\website\\default\\cgi-bin\\mycalc.exe",  // url和对应的命令
             true
         );
         cgis[1] = new BuildInCgi(
-            "mydatabase.exe",
-            ".\\website\\default\\cgi-bin\\mydatabase.exe",     //路径路径路径
+            "dataset.py",
+            ".\\website\\default\\cgi-bin\\dataset.py",
             true
         );
     }
@@ -84,16 +85,24 @@ public final class CgiResponse implements IRequest{
             File f = hha.getRequestFile();
             if(f!=null){
                 count ++;
-                String []env = getENV(hha);
                 try{
                     File runPath = new File(cgiPath);
-                    Process cgi = Runtime.getRuntime().exec(cgiPath, env, runPath.getParentFile());
+                    String cmd=cgiPath;
+                    if(name.endsWith(".py")) {
+                    	cmd="python"+" "+cgiPath;
+                    	//env=null;  // 如果env用getENV()的结果则调用CGI输出为空，不知道为什么
+                    }
+                    //System.out.println("Command:"+cmd);
+                    //System.out.println(runPath.getParentFile());
+                    Process cgi = Runtime.getRuntime().exec(cmd);
                     writePostMessage(cgi.getOutputStream(), hha);
                     StringBuffer data = readData(cgi.getInputStream());
+                    cgi.waitFor(10, TimeUnit.SECONDS);
                     hha.println("HTTP/1.1 200 OK");
 
                     hha.setContentLength(data.length());//之前莫得括号的
                     hha.printEnd();
+                    //System.out.println("CGI:"+data.toString());
                     ir.response(new ByteArrayInputStream(data.toString().getBytes()));
                     return;
                 }catch (Exception e) {
@@ -109,48 +118,6 @@ public final class CgiResponse implements IRequest{
             out.flush();
             out.close();
         }
-
-        private String[] getENV(HttpHeadAnalyser hha) {
-            String[] env = new String[22];
-            String scrname = sf(hha.getRequestFile().getName());
-            String abspath = sf(hha.getRequestFile().getAbsolutePath());
-
-            env[0] = "CONTENT_TYPE="	+	sf(hha.get("Content-Type"));
-            env[1] = "PATH_TRANSLATED="	+	abspath;
-            env[6] = "SCRIPT_NAME="		+	scrname;
-            env[12]= "PATH_INFO="		+
-                    sf( abspath.substring(0, abspath.length() - scrname.length()) );
-
-            env[2] = "QUERY_STRING="	+	sf(hha.getArguments());
-            env[3] = "REMOTE_ADDR="		+	sf(hha.getRemoteAddress().getHostAddress());
-            env[4] = "REMOTE_HOST="		+	sf(hha.getRemoteAddress().getHostName());
-            env[5] = "REQUEST_METHOD="	+	sf(hha.getMethod());
-            env[7] = "SERVER_NAME="		+	sf(hha.getHost());
-            env[8] = "SERVER_PORT="		+	WebConfig.serverPort;
-            env[9] = "SERVER_SOFTWARE="	+	"v0.471 WebDrome";//VersionControl.programName+' '+
-                    //VersionControl.version;
-
-            env[10]= "SERVER_PROTOCOL=HTTP/1.1";
-            env[11]= "GATEWAY_INTERFACE=CGI/1.1";
-            env[13]= "REMOTE_IDENT=";
-            env[14]= "REMOTE_USER=";
-            env[15]= "AUTH_TYPE=";
-            env[16]= "CONTENT_LENGTH="	+	(hha.getMessageBody().length>0 ?
-                    hha.getMessageBody().length : "");
-
-            env[17]= "ACCEPT=" 			+	sf(hha.get("Accept"));
-            env[18]= "ACCEPT_ENCODING="	+	sf(hha.get("Accept-Encoding"));
-            env[19]= "ACCEPT_LANGUAGE="	+	sf(hha.get("Accept-Language"));
-            env[20]= "REFFERER="		+	sf(hha.get("Referer"));
-            env[21]= "USER_AGENT="		+	sf(hha.get("User-Agent"));
-
-            return env;
-        }
-
-        private final String sf(String s) {
-            return s!=null ? s : "" ;
-        }
-
 
         /** 读取数据到字符串 */
         private StringBuffer readData(InputStream in){

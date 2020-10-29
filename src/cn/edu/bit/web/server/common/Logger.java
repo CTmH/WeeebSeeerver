@@ -10,7 +10,7 @@ import cn.edu.bit.web.server.config.WebConfig;
 /**
  * 打印日志系统
  */
-public final class LogSystem {
+public final class Logger {
 	public static final int lineLength = 79;
 	public static final String line;
 	public static final String filename = "";
@@ -30,7 +30,7 @@ public final class LogSystem {
 			try {
 				t_logout = new FileOutputStream(logf, true);
 				t_logout.write( ("\r\n#\r\n#   "+
-						"Start at :"+":"+getDate()+"\r\n#\r\n").getBytes() );
+						"开始时间 :"+":"+getDate()+"\r\n#\r\n").getBytes() );
 				
 			} catch(Exception o) {
 				System.out.println("写日志错误"+":"+logf);
@@ -48,25 +48,25 @@ public final class LogSystem {
 		line = t;
 	}
 	
-	/** 不允许取得实例 */
-	private LogSystem() {}
+	/** 单例模式 */
+	private Logger() {}
 	
 	/**
 	 * 打印正常消息
 	 */
 	public final static void message(Object o) {
 		String s = getDate() + o;
-		System.out.println("[Info] "+s);
-		printtoFile("[Info] "+s);
+		System.out.println("[Log] "+s);
+		printtoFile("[Log] "+s);
 	}
 	
 	/**
-	 * 打印错误消息
+	 * 打印错误日志
 	 */
 	public final static void error(Object o) {
 		String s = getDate() + o;
-		System.out.println("[Err ] "+s);
-		printtoFile("[Err ] "+s);
+		System.out.println("[错误 ] "+s);
+		printtoFile("[错误 ] "+s);
 	}
 	
 	/**
@@ -91,7 +91,7 @@ public final class LogSystem {
 	
 	/**
 	 * 写入日志文件,
-	 * @param o - 写入的内容
+	 * @param o - 写入内容
 	 */
 	public static final void printtoFile(Object o) {
 		if (WebConfig.printLogFile && logout!=null) {

@@ -3,6 +3,7 @@ package cn.edu.bit.web.server;
 import javax.swing.JOptionPane;
 
 import cn.edu.bit.web.server.common.WebServer;
+import cn.edu.bit.web.server.config.WebConfig;
 
 
 public class Main {
@@ -20,7 +21,15 @@ public class Main {
 					return;
 				}
 			}
-			else {
+			else if (args[i].startsWith("-t:")) {
+				try {
+					int threads = Integer.parseInt( args[i].substring(3) );
+					WebConfig.maxThread=threads;  // 在服务器start之前调用
+				} catch(NumberFormatException e) {
+					System.err.println(e);
+					return;
+				}
+			} else {
 				System.err.println("参数错误"+".");
 				JOptionPane.showMessageDialog(	null, 
 												"参数错误"+".", 
