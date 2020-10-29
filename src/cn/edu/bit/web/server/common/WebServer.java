@@ -68,6 +68,7 @@ public class WebServer implements Runnable{
 			return;
 		}
 		
+		printWelcome();
 		try {
 			System.out.println(	"服务器地址"+":\t"+
 					InetAddress.getLocalHost().getHostAddress()+"/" +
@@ -79,15 +80,9 @@ public class WebServer implements Runnable{
 		System.out.println("服务开始时间"+":\t"+Logger.getDate());
 		
 
-//		// 初始化过滤系统
-//		FilterSystem.init();
-//		// 初始化cgi管理器
-//		Cgi_Manage.Init();
-		// 初始化文件管理器
+		// 初始化文件管理器和CGI管理器
 		FileManager.Init();
 		CgiManager.Init();
-//		// 初始化文件类型
-//		MimeTypes.init();
 		// 初始化虚拟主机配置
 		VirtualHostSystem.init();
 		
